@@ -15,19 +15,17 @@
   "build": {
     "appId": "com.dfx.timer",
     "productName": "DFX Timer",
-    "files": [
-      "**/*",
-      "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-      "!node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-      "!node_modules/*.d.ts",
-      "!node_modules/.bin",
-      "!DFX-Timer-win32-x64",
-      "!dist"
-    ],
     "win": {
       "target": "portable",
-      "icon": "icon.ico",
-      "sign": false
-    }
+      "icon": "icon.ico"
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!dist/*",
+      "!.github/*"
+    ]
   }
 }
