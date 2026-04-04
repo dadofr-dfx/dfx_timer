@@ -11,14 +11,13 @@ jobs:
       - name: Instalar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 16 # Versão ideal para Electron 11
+          node-version: 16
 
       - name: Instalar Dependências
         run: npm install --legacy-peer-deps
 
       - name: Gerar Executável
-        # O segredo está nestas duas variáveis de ambiente abaixo
         run: npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_OPTIONS: "--openssl-legacy-provider"
+          # Removida a linha NODE_OPTIONS que causou o erro
