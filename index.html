@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: rgba(0,0,0,0.01);
+    font-family: Arial;
+    color: white;
+    overflow: hidden;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+  }
+
+  #timer {
+    font-size: 80px;
+    color: white;
+
+    -webkit-app-region: drag;
+    cursor: move;
+
+    max-width: 90vw;
+    word-break: break-word;
+  }
+
+  #controls {
+    margin-top: 10px;
+    -webkit-app-region: no-drag;
+  }
+
+  input {
+    width: 60px;
+    text-align: center;
+  }
+
+  button {
+    margin: 5px;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <div id="timer">00:00</div>
+
+  <div id="controls">
+    <input id="minutes" placeholder="min" oninput="previewTime()">
+    <input id="seconds" placeholder="seg" oninput="previewTime()">
+
+    <div>
+      <button onclick="setMode('countdown')">⏳</button>
+      <button onclick="setMode('stopwatch')">⏱</button>
+      <button onclick="setMode('clock')">🕒</button>
+    </div>
+
+    <div>
+      <button onclick="start()">▶</button>
+      <button onclick="reset()">⏹</button>
+    </div>
+
+    <div style="font-size:12px; opacity:0.6;">
+      ESC fecha | H mostra UI | + / - escala
+    </div>
+  </div>
+
+</div>
+
+<script>
+let interval;
+let blinkInterval;
+let time = 0;
+let mode = "countdown";
+let baseFontSize = 80;
+
+function resizeWindow(){
+  const app = document.getElementById("app");
+
+  setTimeout(() => {
+    const rect = app.getBoundingClientRect();
+
+    window.resizeTo(
+      Math.ceil(rect.width + 20),
+      Math.ceil(rect.height + 20)
+    );
+  }, 10);
+}
+
+function applyScale(){
+  document.getElementById("timer").style.fontSize = baseFontSize + "px";
+
+  const controls = document.getElementById("controls");
+  controls.style.fontSize = (baseFontSize / 4) + "px";
+
+  resizeWindow();
+}
+
+function format(t){
+  let m = Math.floor(Math.abs(t)/60);
+  let s = Math.abs(t)%60;
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+function hideUI(){
+  document.getElementById("controls").style.display = "none";
+  resizeWindow();
+}
+
+function showUI(){
+  document.getElementById("controls").style.display = "block";
+  resizeWindow();
+}
+
+function setMode(newMode){
+  clearInterval(interval);
+  clearInterval(blinkInterval);
+
+  mode = newMode;
+
+  if(mode === "clock"){
+    hideUI();
+    startClock();
+    return;
+  }
+
+  showUI();
+
+  if(mode === "countdown"){
+    previewTime();
+  }
+
+  if(mode === "stopwatch"){
+    document.getElementById("timer").innerText = "00:00";
+  }
+
+  resizeWindow();
+}
+
+function previewTime(){
+  if(mode !== "countdown") return;
+
+  let m = parseInt(document.getElementById("minutes").value) || 0;
+  let s = parseInt(document.getElementById("seconds").value) || 0;
+
+  time = m*60 + s;
+  updateTimer();
+}
+
+function start(){
+  clearInterval(interval);
+  clearInterval(blinkInterval);
+
+  hideUI();
+
+  if(mode === "countdown"){
+    let m = parseInt(document.getElementById("minutes").value) || 0;
+    let s = parseInt(document.getElementById("seconds").value) || 0;
+    time = m*60 + s;
+
+    interval = setInterval(()=>{
+      if(time <= 0){
+        clearInterval(interval);
+        showEndMessage();
+        return;
+      }
+      time--;
+      updateTimer();
+    },1000);
+  }
+
+  if(mode === "stopwatch"){
+    time = 0;
+    interval = setInterval(()=>{
+      time++;
+      updateTimer();
+    },1000);
+  }
+}
+
+function startClock(){
+  interval = setInterval(()=>{
+    const now = new Date();
+    const h = now.getHours().toString().padStart(2,'0');
+    const m = now.getMinutes().toString().padStart(2,'0');
+    const s = now.getSeconds().toString().padStart(2,'0');
+    document.getElementById("timer").innerText = `${h}:${m}:${s}`;
+    resizeWindow();
+  },1000);
+}
+
+function reset(){
+  clearInterval(interval);
+  clearInterval(blinkInterval);
+
+  const el = document.getElementById("timer");
+  el.style.opacity = "1";
+  el.style.color = "white";
+
+  if(mode === "countdown"){
+    previewTime();
+  } else {
+    el.innerText = "00:00";
+  }
+
+  showUI();
+}
+
+function updateTimer(){
+  const el = document.getElementById("timer");
+  el.innerText = format(time);
+  resizeWindow();
+}
+
+function showEndMessage(){
+  const el = document.getElementById("timer");
+
+  el.innerText = "TEMPO ESGOTADO";
+
+  // 🔥 ajuste automático de tamanho
+  el.style.fontSize = baseFontSize * 0.5 + "px";
+
+  resizeWindow();
+
+  let visible = true;
+
+  blinkInterval = setInterval(()=>{
+    visible = !visible;
+
+    el.style.opacity = visible ? "1" : "0.2";
+    el.style.color = visible ? "red" : "white";
+  }, 400);
+}
+
+document.addEventListener("keydown", (e)=>{
+
+  if(e.key === "Escape"){
+    window.close();
+  }
+
+  if(e.key.toLowerCase() === "h"){
+    showUI();
+  }
+
+  if(e.key === "+" || e.key === "="){
+    baseFontSize += 5;
+    applyScale();
+  }
+
+  if(e.key === "-"){
+    baseFontSize = Math.max(20, baseFontSize - 5);
+    applyScale();
+  }
+
+});
+
+applyScale();
+resizeWindow();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "dfx-timer",
+  "version": "1.0.0",
+  "main": "main.js",
+  "description": "DFX Timer Overlay",
+  "author": "DFX",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^11.5.0",
+    "electron-builder": "^26.8.1"
+  },
+  "build": {
+    "appId": "com.dfx.timer",
+    "productName": "DFX Timer",
+    "files": [
+      "**/*",
+      "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
+      "!node_modules/*.d.ts",
+      "!node_modules/.bin",
+      "!DFX-Timer-win32-x64",
+      "!dist"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "icon.ico",
+      "sign": false
+    }
+  }
+}
