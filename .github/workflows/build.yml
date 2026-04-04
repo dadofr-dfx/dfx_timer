@@ -1,8 +1,5 @@
 name: Build DFX Timer
-on: 
-  push:
-    branches:
-      - main  # Ou o nome da sua branch principal (ex: master)
+on: [push, workflow_dispatch]
 
 jobs:
   release:
@@ -14,18 +11,14 @@ jobs:
       - name: Instalar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 14 # Versão compatível com seu Electron 11
+          node-version: 16 # Versão ideal para Electron 11
 
       - name: Instalar Dependências
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Gerar Executável
+        # O segredo está nestas duas variáveis de ambiente abaixo
         run: npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Salvar o .exe
-        uses: actions/upload-artifact@v4
-        with:
-          name: DFX-Timer-Portable
-          path: dist/*.exe
+          NODE_OPTIONS: "--openssl-legacy-provider"
