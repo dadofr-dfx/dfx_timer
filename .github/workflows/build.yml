@@ -20,4 +20,12 @@ jobs:
         run: npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Removida a linha NODE_OPTIONS que causou o erro
+
+      - name: Salvar o .exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: DFX-Timer-Portable
+          # O asterisco duplo busca em todas as pastas, inclusive subpastas
+          path: "**/*.exe"
+          # Se não encontrar nada, o build vai avisar exatamente o motivo
+          if-no-files-found: error
