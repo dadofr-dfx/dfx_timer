@@ -1,272 +1,274 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-
 <style>
+  /* 1. RESET E ESTILO BASE */
   html, body {
     margin: 0;
     padding: 0;
-    background: rgba(0,0,0,0.01);
-    font-family: Arial;
+    background: transparent; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     color: white;
     overflow: hidden;
   }
 
+  /* Container Principal */
   #app {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
+    padding: 15px;
+    border-radius: 12px;
+    /* Estilo de vidro inicial */
+    background: rgba(15, 15, 20, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
     text-align: center;
-    padding: 10px;
   }
 
+  /* 2. O TIMER (NÚMEROS) */
   #timer {
     font-size: 80px;
-    color: white;
-
+    font-weight: 200;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 20px rgba(0, 162, 255, 0.5);
     -webkit-app-region: drag;
     cursor: move;
-
-    max-width: 90vw;
-    word-break: break-word;
+    white-space: pre-wrap; /* Essencial para as duas linhas (\n) */
+    line-height: 1.1;
+    display: block;
   }
 
+  /* 3. PAINEL DE CONTROLES */
   #controls {
-    margin-top: 10px;
+    margin-top: 15px;
     -webkit-app-region: no-drag;
+    transition: opacity 0.3s ease;
   }
 
+  .control-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  /* 4. INPUTS E BOTÕES MODERNOS */
   input {
     width: 60px;
+    padding: 8px;
     text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    color: white;
+    outline: none;
+  }
+
+  /* Placeholder em branco */
+  input::placeholder {
+    color: #ffffff;
+    opacity: 1;
   }
 
   button {
-    margin: 5px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
+
+  button:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-1px); }
+  .btn-action { background: rgba(0, 162, 255, 0.2); border-color: rgba(0, 162, 255, 0.3); }
+
+  .help-text { font-size: 10px; opacity: 0.4; margin-top: 10px; text-transform: uppercase; letter-spacing: 1px; }
 </style>
 </head>
-
 <body>
 
 <div id="app">
-
   <div id="timer">00:00</div>
 
   <div id="controls">
-    <input id="minutes" placeholder="min" oninput="previewTime()">
-    <input id="seconds" placeholder="seg" oninput="previewTime()">
-
-    <div>
-      <button onclick="setMode('countdown')">⏳</button>
-      <button onclick="setMode('stopwatch')">⏱</button>
-      <button onclick="setMode('clock')">🕒</button>
+    <div class="control-group">
+      <input type="number" id="minutes" placeholder="min" oninput="previewTime()">
+      <input type="number" id="seconds" placeholder="seg" oninput="previewTime()">
     </div>
 
-    <div>
-      <button onclick="start()">▶</button>
-      <button onclick="reset()">⏹</button>
+    <div class="control-group">
+      <button onclick="setMode('countdown')" title="Regressiva">⏳</button>
+      <button onclick="setMode('stopwatch')" title="Cronómetro">⏱</button>
+      <button onclick="setMode('clock')" title="Relógio">🕒</button>
     </div>
 
-    <div style="font-size:12px; opacity:0.6;">
-      ESC fecha | H mostra UI | + / - escala
+    <div class="control-group">
+      <button class="btn-action" onclick="start()">▶</button>
+      <button class="btn-action" onclick="reset()">⏹</button>
     </div>
+    <div class="help-text">ESC Sair | H Menu | + / - Tamanho</div>
   </div>
-
 </div>
 
 <script>
-let interval;
-let blinkInterval;
+let interval, blinkInterval;
 let time = 0;
 let mode = "countdown";
 let baseFontSize = 80;
 
-function resizeWindow(){
-  const app = document.getElementById("app");
-
+function resizeWindow() {
   setTimeout(() => {
-    const rect = app.getBoundingClientRect();
+    const app = document.getElementById("app");
+    const width = app.offsetWidth + 40;
+    const height = app.offsetHeight + 40;
+    window.resizeTo(Math.ceil(width), Math.ceil(height));
+  }, 60);
+}
 
-    window.resizeTo(
-      Math.ceil(rect.width + 20),
-      Math.ceil(rect.height + 20)
-    );
+function hideUI() {
+  const controls = document.getElementById("controls");
+  const app = document.getElementById("app");
+  
+  controls.style.opacity = "0";
+  setTimeout(() => {
+    controls.style.display = "none";
+    // Remove fundo, borda e sombra, mas mantém o backdrop-filter (blur)
+    app.style.background = "transparent";
+    app.style.border = "none";
+    app.style.boxShadow = "none";
+    resizeWindow();
+  }, 300);
+}
+
+function showUI() {
+  const controls = document.getElementById("controls");
+  const app = document.getElementById("app");
+  
+  app.style.background = "rgba(15, 15, 20, 0.4)";
+  app.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+  app.style.boxShadow = "0 8px 32px 0 rgba(0, 0, 0, 0.37)";
+  
+  controls.style.display = "block";
+  setTimeout(() => {
+    controls.style.opacity = "1";
+    resizeWindow();
   }, 10);
 }
 
-function applyScale(){
-  document.getElementById("timer").style.fontSize = baseFontSize + "px";
-
-  const controls = document.getElementById("controls");
-  controls.style.fontSize = (baseFontSize / 4) + "px";
-
-  resizeWindow();
-}
-
-function format(t){
-  let m = Math.floor(Math.abs(t)/60);
-  let s = Math.abs(t)%60;
-  return `${m}:${s.toString().padStart(2,'0')}`;
-}
-
-function hideUI(){
-  document.getElementById("controls").style.display = "none";
-  resizeWindow();
-}
-
-function showUI(){
-  document.getElementById("controls").style.display = "block";
-  resizeWindow();
-}
-
-function setMode(newMode){
+function setMode(m) {
   clearInterval(interval);
   clearInterval(blinkInterval);
+  const el = document.getElementById("timer");
+  el.style.color = "white";
+  el.style.opacity = "1";
+  el.style.fontSize = baseFontSize + "px";
+  el.style.fontWeight = "200"; // Volta para o peso fino
 
-  mode = newMode;
-
-  if(mode === "clock"){
-    hideUI();
-    startClock();
-    return;
+  mode = m;
+  if (mode === "clock") { 
+    hideUI(); 
+    startClock(); 
+  } else { 
+    showUI(); 
+    if (mode === "countdown") previewTime(); 
+    else el.innerText = "00:00"; 
   }
-
-  showUI();
-
-  if(mode === "countdown"){
-    previewTime();
-  }
-
-  if(mode === "stopwatch"){
-    document.getElementById("timer").innerText = "00:00";
-  }
-
-  resizeWindow();
 }
 
-function previewTime(){
-  if(mode !== "countdown") return;
-
+function previewTime() {
+  if (mode !== "countdown") return;
   let m = parseInt(document.getElementById("minutes").value) || 0;
   let s = parseInt(document.getElementById("seconds").value) || 0;
-
-  time = m*60 + s;
-  updateTimer();
+  time = m * 60 + s;
+  document.getElementById("timer").innerText = format(time);
+  resizeWindow();
 }
 
-function start(){
-  clearInterval(interval);
-  clearInterval(blinkInterval);
+function format(t) {
+  let m = Math.floor(Math.abs(t) / 60);
+  let s = Math.abs(t) % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
 
+function start() {
+  clearInterval(interval);
+  if (mode === "clock") return;
   hideUI();
-
-  if(mode === "countdown"){
-    let m = parseInt(document.getElementById("minutes").value) || 0;
-    let s = parseInt(document.getElementById("seconds").value) || 0;
-    time = m*60 + s;
-
-    interval = setInterval(()=>{
-      if(time <= 0){
-        clearInterval(interval);
-        showEndMessage();
-        return;
-      }
+  
+  interval = setInterval(() => {
+    if (mode === "countdown") {
+      if (time <= 0) { clearInterval(interval); showEndMessage(); return; }
       time--;
-      updateTimer();
-    },1000);
-  }
-
-  if(mode === "stopwatch"){
-    time = 0;
-    interval = setInterval(()=>{
+    } else {
       time++;
-      updateTimer();
-    },1000);
-  }
-}
-
-function startClock(){
-  interval = setInterval(()=>{
-    const now = new Date();
-    const h = now.getHours().toString().padStart(2,'0');
-    const m = now.getMinutes().toString().padStart(2,'0');
-    const s = now.getSeconds().toString().padStart(2,'0');
-    document.getElementById("timer").innerText = `${h}:${m}:${s}`;
+    }
+    document.getElementById("timer").innerText = format(time);
     resizeWindow();
-  },1000);
+  }, 1000);
 }
 
-function reset(){
+function startClock() {
+  interval = setInterval(() => {
+    const now = new Date();
+    document.getElementById("timer").innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    resizeWindow();
+  }, 1000);
+}
+
+function reset() {
   clearInterval(interval);
   clearInterval(blinkInterval);
-
   const el = document.getElementById("timer");
-  el.style.opacity = "1";
+  el.style.opacity = "1"; 
   el.style.color = "white";
-
-  if(mode === "countdown"){
-    previewTime();
-  } else {
-    el.innerText = "00:00";
-  }
-
+  el.style.fontSize = baseFontSize + "px";
+  el.style.fontWeight = "200";
+  if (mode === "countdown") previewTime(); 
+  else el.innerText = "00:00";
   showUI();
 }
 
-function updateTimer(){
+function showEndMessage() {
   const el = document.getElementById("timer");
-  el.innerText = format(time);
-  resizeWindow();
-}
-
-function showEndMessage(){
-  const el = document.getElementById("timer");
-
-  el.innerText = "TEMPO ESGOTADO";
-
-  // 🔥 ajuste automático de tamanho
-  el.style.fontSize = baseFontSize * 0.5 + "px";
-
+  // Mensagem em duas linhas centralizadas e em NEGRITO
+  el.innerText = "TEMPO\nESGOTADO";
+  el.style.fontWeight = "bold";
+  el.style.fontSize = (baseFontSize * 0.5) + "px";
+  
   resizeWindow();
 
-  let visible = true;
-
-  blinkInterval = setInterval(()=>{
-    visible = !visible;
-
-    el.style.opacity = visible ? "1" : "0.2";
-    el.style.color = visible ? "red" : "white";
+  let v = true;
+  blinkInterval = setInterval(() => {
+    v = !v;
+    el.style.color = v ? "#ff4d4d" : "white";
+    el.style.opacity = v ? "1" : "0.5";
   }, 400);
 }
 
-document.addEventListener("keydown", (e)=>{
-
-  if(e.key === "Escape"){
-    window.close();
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") window.close();
+  if (e.key.toLowerCase() === "h") {
+    const controls = document.getElementById("controls");
+    if (controls.style.display === "none") showUI();
+    else hideUI();
   }
-
-  if(e.key.toLowerCase() === "h"){
-    showUI();
+  if (e.key === "+" || e.key === "=") { 
+    baseFontSize += 5; 
+    document.getElementById("timer").style.fontSize = baseFontSize + "px"; 
+    resizeWindow(); 
   }
-
-  if(e.key === "+" || e.key === "="){
-    baseFontSize += 5;
-    applyScale();
+  if (e.key === "-") { 
+    baseFontSize = Math.max(20, baseFontSize - 5); 
+    document.getElementById("timer").style.fontSize = baseFontSize + "px"; 
+    resizeWindow(); 
   }
-
-  if(e.key === "-"){
-    baseFontSize = Math.max(20, baseFontSize - 5);
-    applyScale();
-  }
-
 });
 
-applyScale();
-resizeWindow();
+window.onload = resizeWindow;
 </script>
-
 </body>
 </html>
