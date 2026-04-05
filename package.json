@@ -6,13 +6,13 @@
   "author": "DFX",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --win portable"
+    "build": "electron-builder --win"
   },
   "devDependencies": {
     "electron": "^11.5.0",
     "electron-builder": "^26.8.1"
   },
- "build": {
+  "build": {
     "appId": "com.dfx.timer",
     "productName": "DFX Timer",
     "directories": {
@@ -20,7 +20,7 @@
     },
     "win": {
       "target": [
-        "nsis" 
+        "nsis"
       ],
       "icon": "icon.ico"
     },
@@ -29,7 +29,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "shortcutName": "DFX Timer"
+      "shortcutName": "DFX Timer",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "uninstallDisplayName": "Desinstalar DFX Timer"
     },
     "files": [
       "**/*",
@@ -37,3 +40,4 @@
       "!.github/*"
     ]
   }
+}
