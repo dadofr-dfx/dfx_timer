@@ -12,15 +12,24 @@
     "electron": "^11.5.0",
     "electron-builder": "^26.8.1"
   },
-  "build": {
+ "build": {
     "appId": "com.dfx.timer",
     "productName": "DFX Timer",
-    "win": {
-      "target": "portable",
-      "icon": "icon.ico"
-    },
     "directories": {
       "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis" 
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "DFX Timer"
     },
     "files": [
       "**/*",
@@ -28,4 +37,3 @@
       "!.github/*"
     ]
   }
-}
